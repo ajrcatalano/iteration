@@ -33,7 +33,7 @@ library(rvest)
 set.seed(1)
 ```
 
-## Z-Score Function
+## Simple Z-Score function
 
 ``` r
 x_vec = rnorm(30, mean = 5, sd = 3)
@@ -126,3 +126,86 @@ z_scores(x_vec)
     ## [16] -0.137851865 -0.106748415  0.932105430  0.799422547  0.553437533
     ## [21]  0.905205442  0.757128408 -0.008541293 -2.241925304  0.581490604
     ## [26] -0.149966223 -0.257816586 -1.680744021 -0.606639531  0.363029790
+
+## Functions with multiple outputs
+
+``` r
+mean_and_sd = function(x) {
+  
+  if (!is.numeric(x)) {
+    stop("Input must be numeric")
+  }
+  
+  if (length(x) < 3) {
+    stop("Input must have at least numbers")
+  }
+    
+  mean_x = mean(x)
+  sd_x = sd(x)
+  
+  tibble(
+    mean = mean_x,
+    sd = sd_x
+  )
+  
+}
+```
+
+Checking to see if function works
+
+``` r
+x_vec = rnorm(1000)
+mean_and_sd(x_vec)
+```
+
+    ## # A tibble: 1 × 2
+    ##      mean    sd
+    ##     <dbl> <dbl>
+    ## 1 -0.0201  1.04
+
+## Multiple inputs
+
+``` r
+sim_data = 
+  tibble(
+    x = rnorm(100, mean = 4, sd = 3)
+  )
+
+sim_data |> 
+  summarize(
+    mean = mean(x),
+    sd = sd(x)
+  )
+```
+
+    ## # A tibble: 1 × 2
+    ##    mean    sd
+    ##   <dbl> <dbl>
+    ## 1  3.90  2.96
+
+Turning this into a function
+
+``` r
+sim_mean_sd = function(samp_size, mu, sigma) {
+  
+  sim_data = 
+  tibble(
+    x = rnorm(n = samp_size, mean = mu, sd = sigma)
+  )
+
+  sim_data |> 
+    summarize(
+      mean = mean(x),
+      sd = sd(x)
+  )
+
+}
+
+# testing function
+sim_mean_sd(100, 6, 3)
+```
+
+    ## # A tibble: 1 × 2
+    ##    mean    sd
+    ##   <dbl> <dbl>
+    ## 1  6.02  3.20
