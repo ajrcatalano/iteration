@@ -85,3 +85,16 @@ for (i in 1:4) {
 }
 ```
 
+## `Map`
+
+```{r}
+# output identical to for loop
+output = map(list_norm, mean_and_sd)
+```
+
+Using another function
+
+```{r}
+output = map(list_norm, median)
+```
+
