@@ -311,7 +311,7 @@ read_page_reviews(dynamite_url)
 
 dynamite_url_base = "https://www.amazon.com/product-reviews/B00005JNBQ/ref=cm_cr_arp_d_viewopt_rvwer?ie=UTF8&reviewerType=avp_only_reviews&sortBy=recent&pageNumber="
 
-dynamite_urls = str_c(dynamite_url_base, 1:5)
+dynamite_urls = str_c(dynamite_url_base, 1:50)
 
 five_pages_reviews = 
   rbind(
@@ -322,3 +322,69 @@ five_pages_reviews =
     read_page_reviews(dynamite_urls[5])
 )
 ```
+
+## Mean scoping example
+
+``` r
+f = function(x) {
+  
+  z = x + y
+  
+  z
+  
+}
+
+# x and y are in global env.
+x = 1
+y = 2
+
+f(x = y)
+```
+
+    ## [1] 4
+
+## Functions as arguments
+
+``` r
+my_summary = function(x, summ_func) {
+  
+  summ_func(x)
+  
+}
+
+x_vec = rnorm(100, mean = 3, sd = 7)
+
+mean(x_vec)
+```
+
+    ## [1] 3.980006
+
+``` r
+median(x_vec)
+```
+
+    ## [1] 3.443128
+
+``` r
+my_summary(x_vec, mean)
+```
+
+    ## [1] 3.980006
+
+``` r
+my_summary(x_vec, median)
+```
+
+    ## [1] 3.443128
+
+``` r
+my_summary(x_vec, sd)
+```
+
+    ## [1] 7.231017
+
+``` r
+my_summary(x_vec, IQR)
+```
+
+    ## [1] 9.173918
