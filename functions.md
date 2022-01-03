@@ -186,6 +186,8 @@ sim_data |>
 Turning this into a function
 
 ``` r
+# can include default values by specifying them in function statement
+
 sim_mean_sd = function(samp_size, mu, sigma) {
   
   sim_data = 
@@ -209,3 +211,114 @@ sim_mean_sd(100, 6, 3)
     ##    mean    sd
     ##   <dbl> <dbl>
     ## 1  6.02  3.20
+
+## Scraping Amazon
+
+``` r
+url = "https://www.amazon.com/product-reviews/B00005JNBQ/ref=cm_cr_arp_d_viewopt_rvwer?ie=UTF8&reviewerType=avp_only_reviews&sortBy=recent&pageNumber=1"
+
+dynamite_html = read_html(url)
+
+review_titles = 
+  dynamite_html %>%
+  html_nodes(".a-text-bold span") %>%
+  html_text()
+
+review_stars = 
+  dynamite_html %>%
+  html_nodes("#cm_cr-review_list .review-rating") %>%
+  html_text() %>%
+  str_extract("^\\d") %>%
+  as.numeric()
+
+review_text = 
+  dynamite_html %>%
+  html_nodes(".review-text-content span") %>%
+  html_text() %>% 
+  str_replace_all("\n", "") %>% 
+  str_trim()
+
+reviews = tibble(
+  title = review_titles,
+  stars = review_stars,
+  text = review_text
+)
+
+# what about the next page of reviews?
+```
+
+Turning this into a function
+
+``` r
+# note that only change across pages is the url
+
+read_page_reviews = function(url) {
+  
+  dynamite_html = read_html(url)
+  
+  review_titles = 
+    dynamite_html %>%
+    html_nodes(".a-text-bold span") %>%
+    html_text()
+
+  review_stars = 
+    dynamite_html %>%
+    html_nodes("#cm_cr-review_list .review-rating") %>%
+    html_text() %>%
+    str_extract("^\\d") %>%
+    as.numeric()
+  
+  review_text = 
+    dynamite_html %>%
+    html_nodes(".review-text-content span") %>%
+    html_text() %>% 
+    str_replace_all("\n", "") %>% 
+    str_trim()
+
+  reviews = tibble(
+    title = review_titles,
+    stars = review_stars,
+    text = review_text
+  )
+
+  return(reviews)
+
+}
+
+# testing function
+
+dynamite_url = "https://www.amazon.com/product-reviews/B00005JNBQ/ref=cm_cr_arp_d_viewopt_rvwer?ie=UTF8&reviewerType=avp_only_reviews&sortBy=recent&pageNumber=1"
+
+read_page_reviews(dynamite_url)
+```
+
+    ## # A tibble: 10 × 3
+    ##    title                                                  stars text            
+    ##    <chr>                                                  <dbl> <chr>           
+    ##  1 waste of time                                              1 really annoying…
+    ##  2 Greatest movie of the early 2000’s and legendary today     5 You have to hav…
+    ##  3 Excellent movie!                                           5 Napoleon Dynami…
+    ##  4 gets better with time                                      5 The ultimate 19…
+    ##  5 BEST MOVIE EVER ^_^                                        5 THIS IS MY ALL …
+    ##  6 Good                                                       5 Hated it when I…
+    ##  7 One of my Favorite Movies                                  5 This is one of …
+    ##  8 no brainer                                                 5 watched this wi…
+    ##  9 Yeah., it was pretty good.                                 5 Yeah, it was pr…
+    ## 10 Love it                                                    5 Didn't like thi…
+
+``` r
+# reading multiple pages (5) of reviews
+
+dynamite_url_base = "https://www.amazon.com/product-reviews/B00005JNBQ/ref=cm_cr_arp_d_viewopt_rvwer?ie=UTF8&reviewerType=avp_only_reviews&sortBy=recent&pageNumber="
+
+dynamite_urls = str_c(dynamite_url_base, 1:5)
+
+five_pages_reviews = 
+  rbind(
+    read_page_reviews(dynamite_urls[1]),
+    read_page_reviews(dynamite_urls[2]),
+    read_page_reviews(dynamite_urls[3]),
+    read_page_reviews(dynamite_urls[4]),
+    read_page_reviews(dynamite_urls[5])
+)
+```
