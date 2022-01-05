@@ -329,3 +329,217 @@ listcol_df
     ## 2 b     <dbl [30]>   <tibble [1 × 2]>   -1.56
     ## 3 c     <dbl [40]>   <tibble [1 × 2]>    9.99
     ## 4 d     <dbl [20]>   <tibble [1 × 2]>   -2.59
+
+## Weather data
+
+``` r
+weather_df = 
+  rnoaa::meteo_pull_monitors(
+    c("USW00094728", "USC00519397", "USS0023B17S"),
+    var = c("PRCP", "TMIN", "TMAX"), 
+    date_min = "2017-01-01",
+    date_max = "2017-12-31") %>%
+  mutate(
+    name = recode(
+      id, 
+      USW00094728 = "CentralPark_NY", 
+      USC00519397 = "Waikiki_HA",
+      USS0023B17S = "Waterhole_WA"),
+    tmin = tmin / 10,
+    tmax = tmax / 10) %>%
+  select(name, id, everything())
+```
+
+    ## Registered S3 method overwritten by 'hoardr':
+    ##   method           from
+    ##   print.cache_info httr
+
+    ## using cached file: ~/Library/Caches/R/noaa_ghcnd/USW00094728.dly
+
+    ## date created (size, mb): 2021-11-08 08:56:20 (7.611)
+
+    ## file min/max dates: 1869-01-01 / 2021-11-30
+
+    ## using cached file: ~/Library/Caches/R/noaa_ghcnd/USC00519397.dly
+
+    ## date created (size, mb): 2021-11-08 08:56:26 (1.697)
+
+    ## file min/max dates: 1965-01-01 / 2020-02-29
+
+    ## using cached file: ~/Library/Caches/R/noaa_ghcnd/USS0023B17S.dly
+
+    ## date created (size, mb): 2021-11-08 08:56:29 (0.916)
+
+    ## file min/max dates: 1999-09-01 / 2021-11-30
+
+Getting list columns
+
+``` r
+weather_nest = 
+  weather_df |> 
+  nest(data = date:tmin)
+```
+
+``` r
+weather_nest |> 
+  pull(name)
+```
+
+    ## [1] "CentralPark_NY" "Waikiki_HA"     "Waterhole_WA"
+
+``` r
+weather_nest |> 
+  pull(data)
+```
+
+    ## [[1]]
+    ## # A tibble: 365 × 4
+    ##    date        prcp  tmax  tmin
+    ##    <date>     <dbl> <dbl> <dbl>
+    ##  1 2017-01-01     0   8.9   4.4
+    ##  2 2017-01-02    53   5     2.8
+    ##  3 2017-01-03   147   6.1   3.9
+    ##  4 2017-01-04     0  11.1   1.1
+    ##  5 2017-01-05     0   1.1  -2.7
+    ##  6 2017-01-06    13   0.6  -3.8
+    ##  7 2017-01-07    81  -3.2  -6.6
+    ##  8 2017-01-08     0  -3.8  -8.8
+    ##  9 2017-01-09     0  -4.9  -9.9
+    ## 10 2017-01-10     0   7.8  -6  
+    ## # … with 355 more rows
+    ## 
+    ## [[2]]
+    ## # A tibble: 365 × 4
+    ##    date        prcp  tmax  tmin
+    ##    <date>     <dbl> <dbl> <dbl>
+    ##  1 2017-01-01     0  26.7  16.7
+    ##  2 2017-01-02     0  27.2  16.7
+    ##  3 2017-01-03     0  27.8  17.2
+    ##  4 2017-01-04     0  27.2  16.7
+    ##  5 2017-01-05     0  27.8  16.7
+    ##  6 2017-01-06     0  27.2  16.7
+    ##  7 2017-01-07     0  27.2  16.7
+    ##  8 2017-01-08     0  25.6  15  
+    ##  9 2017-01-09     0  27.2  15.6
+    ## 10 2017-01-10     0  28.3  17.2
+    ## # … with 355 more rows
+    ## 
+    ## [[3]]
+    ## # A tibble: 365 × 4
+    ##    date        prcp  tmax  tmin
+    ##    <date>     <dbl> <dbl> <dbl>
+    ##  1 2017-01-01   432  -6.8 -10.7
+    ##  2 2017-01-02    25 -10.5 -12.4
+    ##  3 2017-01-03     0  -8.9 -15.9
+    ##  4 2017-01-04     0  -9.9 -15.5
+    ##  5 2017-01-05     0  -5.9 -14.2
+    ##  6 2017-01-06     0  -4.4 -11.3
+    ##  7 2017-01-07    51   0.6 -11.5
+    ##  8 2017-01-08    76   2.3  -1.2
+    ##  9 2017-01-09    51  -1.2  -7  
+    ## 10 2017-01-10     0  -5   -14.2
+    ## # … with 355 more rows
+
+``` r
+# looking at nested Waterhole data
+
+weather_nest$data[[3]]
+```
+
+    ## # A tibble: 365 × 4
+    ##    date        prcp  tmax  tmin
+    ##    <date>     <dbl> <dbl> <dbl>
+    ##  1 2017-01-01   432  -6.8 -10.7
+    ##  2 2017-01-02    25 -10.5 -12.4
+    ##  3 2017-01-03     0  -8.9 -15.9
+    ##  4 2017-01-04     0  -9.9 -15.5
+    ##  5 2017-01-05     0  -5.9 -14.2
+    ##  6 2017-01-06     0  -4.4 -11.3
+    ##  7 2017-01-07    51   0.6 -11.5
+    ##  8 2017-01-08    76   2.3  -1.2
+    ##  9 2017-01-09    51  -1.2  -7  
+    ## 10 2017-01-10     0  -5   -14.2
+    ## # … with 355 more rows
+
+Regressing `tmax` on `tmin` for each station
+
+``` r
+lm(tmax ~ tmin, data = weather_nest$data[[1]])
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = tmax ~ tmin, data = weather_nest$data[[1]])
+    ## 
+    ## Coefficients:
+    ## (Intercept)         tmin  
+    ##       7.209        1.039
+
+Writing a function to regress all three groups
+
+``` r
+weather_lm = function(df) {
+  
+  lm(tmax ~ tmin, data = df)
+  
+}
+
+# using for loop
+
+output = vector("list", 3)
+
+for (i in 1:3) {
+  
+  output[[i]] = lm(tmax ~ tmin, data = weather_nest$data[[i]])
+  
+}
+
+# using a map
+
+map(weather_nest$data, weather_lm)
+```
+
+    ## [[1]]
+    ## 
+    ## Call:
+    ## lm(formula = tmax ~ tmin, data = df)
+    ## 
+    ## Coefficients:
+    ## (Intercept)         tmin  
+    ##       7.209        1.039  
+    ## 
+    ## 
+    ## [[2]]
+    ## 
+    ## Call:
+    ## lm(formula = tmax ~ tmin, data = df)
+    ## 
+    ## Coefficients:
+    ## (Intercept)         tmin  
+    ##     20.0966       0.4509  
+    ## 
+    ## 
+    ## [[3]]
+    ## 
+    ## Call:
+    ## lm(formula = tmax ~ tmin, data = df)
+    ## 
+    ## Coefficients:
+    ## (Intercept)         tmin  
+    ##       7.499        1.221
+
+``` r
+# map in a list column
+
+weather_nest |> 
+  mutate(
+    models = map(data, weather_lm)
+  )
+```
+
+    ## # A tibble: 3 × 4
+    ##   name           id          data               models
+    ##   <chr>          <chr>       <list>             <list>
+    ## 1 CentralPark_NY USW00094728 <tibble [365 × 4]> <lm>  
+    ## 2 Waikiki_HA     USC00519397 <tibble [365 × 4]> <lm>  
+    ## 3 Waterhole_WA   USS0023B17S <tibble [365 × 4]> <lm>
